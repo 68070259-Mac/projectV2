@@ -18,7 +18,8 @@
             font-family: 'Kanit', sans-serif;
             background-color: #d5e5f3; /* สีพื้นหลังสมมติ */
             color: #333333;
-            background-image: url(bg.jpg);
+            /* ⭐️ [แก้ไข] ⭐️ */
+            background-image: url({{ url_for('static', filename='bg.jpg') }});
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -174,7 +175,7 @@
 <body>
 
     <nav class="top-nav">
-        <img src="logo.jpg" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
+        <img src="{{ url_for('static', filename='logo.jpg') }}" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
     </nav>
         
     <div class="circle">
@@ -207,19 +208,19 @@
             <p class="self-assessment" style="color: #6c7d9c;">📅 ดูปฏิทินคาดการณ์รอบเดือน </p>
             <p class="self-assessment2">ปฏิทินรอบเดือน วางแผนล่วงหน้าสูงสุด 5 รอบเดือนพร้อมไฮไลท์วันสำคัญ</p>
             
-            <a href="calendar.html" class="from-btn">ดูปฏิทิน</a> 
+            <a href="/calendar" class="from-btn">ดูปฏิทิน</a> 
         </div>
         <div class="button-card">
             <p class="self-assessment" style="color: #6c7d9c;" >📝บันทึกสุขภาพประจำวัน</p>
             <p class="self-assessment2">บันทึกอาการทุกวัน! เพื่อดูรูปแบบเฉพาะตัว และมีข้อมูลพร้อมปรึกษาแพทย์</p>
             
-            <a href="dashboard.html" class="from-btn">ตรวจสอบอาการ</a> 
+            <a href="/dashboard" class="from-btn">ตรวจสอบอาการ</a> 
         </div>
     </div>
 
 
     <script>
-        // โค้ด JavaScript สำหรับคำนวณและบันทึก Local Storage
+        // (JavaScript ไม่ต้องแก้ไข)
         const thaiMonths = [
             "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
             "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
@@ -237,7 +238,6 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0); 
 
-            // 1. ดึงข้อมูลจาก Input
             const lastStartDateStr = document.getElementById("lastStart").value;
             const lastEndDateStr = document.getElementById("lastEnd").value;
             const prevStartDateStr = document.getElementById("prevStart").value;
@@ -249,7 +249,6 @@
                 document.querySelector(".date").textContent = "กรุณาใส่ข้อมูล";
                 analysisResultDiv.innerHTML = ``; 
                 circleDiv.classList.remove('is-period');
-                // เคลียร์ Local Storage ถ้าข้อมูลไม่ครบถ้วน
                 localStorage.removeItem('lastStart');
                 return;
             }
@@ -258,7 +257,6 @@
             const lastEnd = new Date(lastEndDateStr);
             const prevStart = new Date(prevStartDateStr);
 
-            // 2. คำนวณความยาวรอบเดือนและประจำเดือน
             const periodDays = Math.floor((lastEnd - lastStart) / oneDay) + 1;
             const cycleDays = Math.floor((lastStart - prevStart) / oneDay);
             
@@ -272,26 +270,22 @@
                 return;
             }
 
-            // 3. คำนวณ Next Period และ Ovulation เพื่อแสดงผล
             let nextPeriodDate = new Date(lastStart);
             nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
             
             const isDuringPeriod = (today >= lastStart && today <= lastEnd);
             
             if (isDuringPeriod) {
-                // เป็นเมนอยู่
                 const periodDayNumber = Math.floor((today - lastStart) / oneDay) + 1;
                 document.querySelector(".Period_in").textContent = `คุณกำลังเป็น`;
                 document.querySelector(".days").textContent = `ประจำเดือน`;
                 document.querySelector(".date").textContent = `วันที่ ${periodDayNumber} จาก ${periodDays} วัน`;
                 circleDiv.classList.add('is-period'); 
                 
-                // คำนวณรอบถัดไปสำหรับ Local Storage แม้จะอยู่ในช่วงเมน
                 while (nextPeriodDate < today) {
                     nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
                 }
             } else {
-                // นับถอยหลัง
                 while (nextPeriodDate < today) {
                     nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
                 }
@@ -304,23 +298,19 @@
                 circleDiv.classList.remove('is-period');
             }
             
-            // 🌟 บันทึกข้อมูลหลักลง Local Storage 🌟
             localStorage.setItem('lastStart', lastStartDateStr);
             localStorage.setItem('lastEnd', lastEndDateStr);
             localStorage.setItem('prevStart', prevStartDateStr);
             localStorage.setItem('periodDays', periodDays); 
             localStorage.setItem('cycleDays', cycleDays); 
-            // บันทึกวันที่คำนวณรอบถัดไป (สำคัญสำหรับปฏิทิน)
             localStorage.setItem('nextPeriodDate', nextPeriodDate.toISOString().split('T')[0]);
 
-            // 4. คำนวณวันตกไข่และช่วงเจริญพันธุ์สำหรับแสดงผลวิเคราะห์
             const ovulation = new Date(nextPeriodDate);
             ovulation.setDate(ovulation.getDate() - 14); 
             const fertileStart = new Date(ovulation);
             fertileStart.setDate(fertileStart.getDate() - 5);
             const fertileEnd = new Date(ovulation); 
 
-            // 5. แสดงผลวิเคราะห์
             let cycleStatus = (21 <= cycleDays && cycleDays <= 35) ? "✅ รอบเดือนปกติ (21-35 วัน)" : 
                               (cycleDays < 21) ? "⚠️ รอบเดือนสั้นกว่าปกติ (< 21 วัน)" : "⚠️ รอบเดือนยาวกว่าปกติ (> 35 วัน)";
 
@@ -337,18 +327,15 @@
             `;
         }
 
-        // FUNCTION: ฟังก์ชันเปลี่ยนหน้า
         function goToCalendar() {
-            // ตรวจสอบว่ามีการคำนวณข้อมูลแล้วก่อนเปลี่ยนหน้า
             if (localStorage.getItem('lastStart')) {
-                // 🌟 ลิงก์ไปที่ calendar.html 🌟
-                window.location.href = 'calendar.html'; 
+                // ⭐️ [แก้ไขลิงก์นี้ (จากครั้งก่อน)] ⭐️
+                window.location.href = '/calendar'; 
             } else {
                 alert('กรุณากรอกข้อมูลรอบเดือนและกด "คำนวณ & อัปเดตข้อมูล" ก่อนดูปฏิทิน');
             }
         }
 
-        // เมื่อโหลดหน้า ให้เรียก updatePeriodInfo() เพื่อแสดงผลจากการตั้งค่าเริ่มต้น
         window.onload = function() {
             updatePeriodInfo();
         };
