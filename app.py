@@ -41,7 +41,7 @@ class CycleHistory(db.Model):
     ovulation_date = db.Column(db.String(100))
     next_date = db.Column(db.String(100))
 
-# --- (ฟังก์ชันที่เหลือทั้งหมดเหมือนเดิม) ---
+# --- ฟังก์ชันสำหรับคำนวณรอบเดือน ---
 def update_cycle_history(current_date_str):
     """
     ตรวจสอบและอัปเดตตาราง CycleHistory โดยอัตโนมัติ
