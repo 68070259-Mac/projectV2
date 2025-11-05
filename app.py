@@ -1,4 +1,4 @@
-# 📄 app.py (V5.4 - Auto Cycle Calculation, Home page enabled)
+# 📄 app.py (V5.5 - Vercel Fix)
 
 import os
 import datetime
@@ -6,8 +6,18 @@ from datetime import timedelta
 from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+# ⭐️ [แก้ไขจุดที่ 1] ⭐️
+# ย้าย basedir ขึ้นมาก่อน
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# ⭐️ [แก้ไขจุดที่ 2] ⭐️
+# บอก Flask ชัดเจนว่า static และ templates อยู่ที่ไหน
+app = Flask(__name__,
+            static_folder=os.path.join(basedir, 'static'),
+            template_folder=os.path.join(basedir, 'templates'))
+
+# ⭐️ [แก้ไขจุดที่ 3] ⭐️
+# (บรรทัด basedir เดิมที่อยู่ตรงนี้ ถูกย้ายไปข้างบนแล้ว)
 
 # --- Database Config (เหมือนเดิม) ---
 # NOTE: Using PostgreSQL for Vercel deployment
@@ -31,7 +41,7 @@ class CycleHistory(db.Model):
     ovulation_date = db.Column(db.String(100))
     next_date = db.Column(db.String(100))
 
-# --- ฟังก์ชันสำหรับคำนวณรอบเดือน ---
+# --- (ฟังก์ชันที่เหลือทั้งหมดเหมือนเดิม) ---
 def update_cycle_history(current_date_str):
     """
     ตรวจสอบและอัปเดตตาราง CycleHistory โดยอัตโนมัติ
